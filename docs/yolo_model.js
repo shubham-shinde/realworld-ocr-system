@@ -28,6 +28,7 @@ class YOLOModel {
 		// Preprocess the image data for YOLO model input
 		const [inputTensor, pad, resize] = preprocessImageData(imageData);
 		// Run the input tensor through the YOLO model
+		console.log(inputTensor.shape, imageData.shape)
 		const outputTensor = await this.model.predict(inputTensor);
 
 		// Process the YOLO model output to obtain bounding box predictions

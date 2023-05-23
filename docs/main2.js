@@ -35,7 +35,9 @@ async function stopVideoCapture() {
 	canvasElement.height = height
 	canvasElement.width = width
 
-	context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+	canvas.width = videoElement.videoWidth;
+	canvas.height = videoElement.videoHeight;
+	context.drawImage(videoElement, 0, 0);
 
 	videoContainer.style.display = 'None'
 	canvasContainer.style.display = 'flex'
