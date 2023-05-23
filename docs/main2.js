@@ -1,5 +1,14 @@
 // Function to start video capturing and display it on canvas
 function startVideoCapture() {
+	const videoContainer = document.getElementById('videoContainer');
+	const canvasContainer = document.getElementById('canvasContainer');
+	const captureBtn = document.getElementById('capture-btn')
+	const resetBtn = document.getElementById('reset-btn')
+	captureBtn.style.display = 'block'
+	videoContainer.style.display = 'flex'
+	resetBtn.style.display = 'None'
+	canvasContainer.style.display = 'None'
+
 	navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false})
 		.then((stream) => {
 			const videoElement = document.getElementById('video');
@@ -26,6 +35,8 @@ async function stopVideoCapture() {
 	const context = canvasElement.getContext('2d');
 	const videoContainer = document.getElementById('videoContainer');
 	const canvasContainer = document.getElementById('canvasContainer');
+	const captureBtn = document.getElementById('capture-btn')
+	const resetBtn = document.getElementById('reset-btn')
 	let height = videoElement.offsetHeight
 	let width = videoElement.offsetWidth
 	// Pause video playback
@@ -39,7 +50,9 @@ async function stopVideoCapture() {
 	canvasElement.height = videoElement.videoHeight;
 	context.drawImage(videoElement, 0, 0);
 
+	captureBtn.style.display = 'None'
 	videoContainer.style.display = 'None'
+	resetBtn.style.display = 'block'
 	canvasContainer.style.display = 'flex'
 
 	// Convert the captured image to TensorFlow.js tensor
@@ -78,6 +91,9 @@ function displayBoundingBoxes(predictions, context) {
 // Add event listener to the capture button
 const captureBtn = document.getElementById('capture-btn');
 captureBtn.addEventListener('click', stopVideoCapture);
+const resetBtn = document.getElementById('reset-btn');
+resetBtn.addEventListener('click', startVideoCapture);
+
 
 // Start video capturing on page load
 window.addEventListener('load', startVideoCapture);
