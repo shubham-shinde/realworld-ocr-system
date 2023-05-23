@@ -70,23 +70,20 @@ function preprocessImageData(tensorData) {
 // Function to process YOLO model output to obtain bounding box predictions
 async function postprocessOutputTensor(outputTensor, pad, resize) {
 	let model_conf = outputTensor.slice([0, 4], [1, 1])
-	let n_boxes = outputTensor.shape[2]
-	let mask = tf.greater(model_conf, tf.tensor(conf)).dataSync()
 	let model_boxes = outputTensor.slice([0, 0], [1, 4])
 		.sub(tf.tensor([[[pad[1][0]], [pad[0][0]], [0], [0]]]))
 		.div(tf.tensor([[[resize], [resize], [resize], [resize]]]))
-	let boxes = []
-	for (let box_i = 0; box_i < n_boxes; box_i++) {
-		if (mask[box_i]) {
-			let box = model_boxes.slice([0, 0, box_i], [1, 4, 1])
-			boxes.push(box)
-		}
-	}
-	predictions = await Promise.all(boxes.map(e => e.data()))
-	// loop over baches of outputTensor
-	//   for each instance file by mask
-	//
-	// predictions = model_boxes.arraySync()[0];
+
+	let all_boxes = model_boxes.squeeze().transpose()
+	let box_indexes = await tf.image.nonMaxSuppressionAsync(
+		all_boxes,
+		model_conf.squeeze(),
+		20, // no of boxes out
+		0.35, // iou threshold
+		conf //score threshold
+	)
+	let boxes = all_boxes.gather(box_indexes)
+	let predictions = await boxes.array()
 	return predictions
 }
 
