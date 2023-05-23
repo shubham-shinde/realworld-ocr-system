@@ -26,12 +26,12 @@ class YOLOModel {
 
 	async detectObjects(imageData) {
 		// Preprocess the image data for YOLO model input
-		const inputTensor = preprocessImageData(imageData);
+		const [inputTensor, pad] = preprocessImageData(imageData);
 		// Run the input tensor through the YOLO model
 		const outputTensor = await this.model.predict(inputTensor);
 
 		// Process the YOLO model output to obtain bounding box predictions
-		const predictions = await postprocessOutputTensor(outputTensor);
+		const predictions = await postprocessOutputTensor(outputTensor, pad);
 
 		return predictions;
 	}
@@ -44,7 +44,7 @@ function preprocessImageData(tensorData) {
 	// Resize the image to 640x640
 	let img_shape = tensorData.shape
 	let resize = Math.min(model_shape[0] / img_shape[0], model_shape[1] / img_shape[1])
-	let resized_shape = [Number(img_shape[0] / resize), Number(img_shape[1] / resize)]
+	let resized_shape = [Number(img_shape[0] * resize), Number(img_shape[1] * resize)]
 	const resizedData = tf.image.resizeBilinear(
 		tensorData,
 		resized_shape
@@ -55,7 +55,7 @@ function preprocessImageData(tensorData) {
 	]
 
 	// Pad the image to make it 640x640 with a value of 114
-	const paddedData = tf.pad(resizedData, [...pad, [0, 0]], [114, 114, 114])
+	const paddedData = tf.pad(resizedData, [...pad, [0, 0]], 114)
 
 	// Normalize pixel values to range from 0 to 1
 	const normalizedData = paddedData.div(255.0);
@@ -63,16 +63,15 @@ function preprocessImageData(tensorData) {
 	// Add a batch dimension to the tensor
 	const batchedData = normalizedData.expandDims(0);
 
-	return batchedData;
+	return [batchedData, pad];
 }
 
 // Function to process YOLO model output to obtain bounding box predictions
-async function postprocessOutputTensor(outputTensor) {
-	let bc = outputTensor.shape[0]
+async function postprocessOutputTensor(outputTensor, pad) {
 	let model_conf = outputTensor.slice([0, 4], [1, 1])
 	let n_boxes = outputTensor.shape[2]
 	let mask = tf.greater(model_conf, tf.tensor(conf)).dataSync()
-	let model_boxes = outputTensor.slice([0, 0], [1, 4])
+	let model_boxes = outputTensor.slice([0, 0], [1, 4]).sub(tf.tensor([[[pad[1][0]], [pad[0][0]], [0], [0]]]))
 	let boxes = []
 	for (let box_i = 0; box_i < n_boxes; box_i++) {
 		if (mask[box_i]) {

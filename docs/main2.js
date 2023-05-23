@@ -15,11 +15,18 @@ async function stopVideoCapture() {
 	const videoElement = document.getElementById('video');
 	const canvasElement = document.getElementById('canvas');
 	const context = canvasElement.getContext('2d');
-
+	const videoContainer = document.getElementById('videoContainer');
+	const canvasContainer = document.getElementById('canvasContainer');
+	let height = videoElement.offsetHeight
+	let width = videoElement.offsetWidth
+	videoContainer.style.display = 'None'
+	canvasContainer.style.display = 'flex'
 	// Pause video playback
 	videoElement.pause();
 
 	// Draw current video frame on the canvas
+	canvasElement.height = height
+	canvasElement.width = width
 	context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
 	// Convert the captured image to TensorFlow.js tensor
