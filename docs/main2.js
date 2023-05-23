@@ -8,6 +8,15 @@ function startVideoCapture() {
 		.catch((error) => {
 			console.error('Error accessing camera:', error);
 		});
+	const videoElement = document.getElementById('video');
+	const canvasElement = document.getElementById('canvas');
+	const context = canvasElement.getContext('2d');
+	// function drawImage(video) {
+	// 	context.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+	// }
+	// canvasInterval = window.setInterval(() => {
+	// 	drawImage(videoElement);
+	// }, 1000 / 1000);
 }
 
 // Function to stop video capturing and display captured image on canvas
@@ -19,15 +28,17 @@ async function stopVideoCapture() {
 	const canvasContainer = document.getElementById('canvasContainer');
 	let height = videoElement.offsetHeight
 	let width = videoElement.offsetWidth
-	videoContainer.style.display = 'None'
-	canvasContainer.style.display = 'flex'
 	// Pause video playback
 	videoElement.pause();
 
 	// Draw current video frame on the canvas
 	canvasElement.height = height
 	canvasElement.width = width
+
 	context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+	videoContainer.style.display = 'None'
+	canvasContainer.style.display = 'flex'
 
 	// Convert the captured image to TensorFlow.js tensor
 	const imageTensor = tf.browser.fromPixels(canvasElement);
