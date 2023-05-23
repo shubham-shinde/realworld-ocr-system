@@ -1,6 +1,6 @@
 // Define the YOLO model class
 const model_shape = [640, 640]
-const conf = 0.2
+const conf = 0.1
 class YOLOModel {
 	constructor() {
 		// Define the YOLO model architecture
@@ -73,13 +73,27 @@ async function postprocessOutputTensor(outputTensor, pad, resize) {
 	let model_boxes = outputTensor.slice([0, 0], [1, 4])
 		.sub(tf.tensor([[[pad[1][0]], [pad[0][0]], [0], [0]]]))
 		.div(tf.tensor([[[resize], [resize], [resize], [resize]]]))
+	let sub = tf.stack([
+		model_boxes.slice([0, 2], [1, 1]).squeeze().div(2),
+		model_boxes.slice([0, 3], [1, 1]).squeeze().div(2),
+		tf.zeros([model_boxes.shape[2]]),
+		tf.zeros([model_boxes.shape[2]])
+	]).expandDims(0)
+	let div = tf.tensor([[[1], [1], [2], [2]]])
+	let add = tf.stack([
+		tf.zeros([model_boxes.shape[2]]),
+		tf.zeros([model_boxes.shape[2]]),
+		model_boxes.slice([0, 0], [1, 1]).squeeze(),
+		model_boxes.slice([0, 1], [1, 1]).squeeze()
+	]).expandDims(0)
+	let model_boxes_xyxy = model_boxes.sub(sub).div(div).add(add)
 
-	let all_boxes = model_boxes.squeeze().transpose()
+	let all_boxes = model_boxes_xyxy.squeeze().transpose()
 	let box_indexes = await tf.image.nonMaxSuppressionAsync(
 		all_boxes,
 		model_conf.squeeze(),
-		20, // no of boxes out
-		0.35, // iou threshold
+		40, // no of boxes out
+		0.1, // iou threshold
 		conf //score threshold
 	)
 	let boxes = all_boxes.gather(box_indexes)

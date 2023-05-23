@@ -80,7 +80,7 @@ function displayBoundingBoxes(predictions, context) {
 		context.strokeStyle = 'red';
 		context.lineWidth = 2;
 		context.beginPath();
-		context.rect(x - width / 2, y - height / 2, width, height);
+		context.rect(x, y, width - x, height - y);
 		context.stroke();
 
 		// Draw label
