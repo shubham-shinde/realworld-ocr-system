@@ -1,0 +1,23 @@
+datasets
+__pycache__
+db_utils/__pycache__
+logs
+wrappers/__pycache__
+.DS_Store
+env
+notebook/datasets
+notebook/runs
+yolov5/runs
+YOLOV8/runs
+
+search_env
+#Ignore temp and swp files
+*~
+*.swp
+*.swo
+tags
+.vimspector.json
+.vscode/
+
+
+

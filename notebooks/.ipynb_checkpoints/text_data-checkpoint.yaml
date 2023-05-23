@@ -1,0 +1,8 @@
+train: ../../datasets/yolov8_train_dataset/images/train/ 
+val:  ../../datasets/yolov8_train_dataset/images/val/
+
+# number of classes
+nc: 1
+
+# class names
+names: ["text"]
