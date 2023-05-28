@@ -1,0 +1,84 @@
+epoch - 0
+learning rate 0.0001
+
+
+
+
+
+
+
+
+
+ 48%|████████████▉              | 75/157 [00:19<00:22,  3.70it/s, loss=38.1]Exception in thread ChkStopThr:
+Traceback (most recent call last):
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/threading.py", line 973, in _bootstrap_inner
+    self.run()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/threading.py", line 910, in run
+    self._target(*self._args, **self._kwargs)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 170, in check_status
+    status_response = self._interface.communicate_stop_status()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface.py", line 127, in communicate_stop_status
+    resp = self._communicate_stop_status(status)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 395, in _communicate_stop_status
+    resp = self._communicate(req, local=True)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 226, in _communicate
+    return self._communicate_async(rec, local=local).get(timeout=timeout)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 231, in _communicate_async
+    raise Exception("The wandb backend process has shutdown")
+Exception: The wandb backend process has shutdown
+Exception in thread NetStatThr:
+Traceback (most recent call last):
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/threading.py", line 973, in _bootstrap_inner
+    self.run()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/threading.py", line 910, in run
+    self._target(*self._args, **self._kwargs)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 152, in check_network_status
+    status_response = self._interface.communicate_network_status()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface.py", line 138, in communicate_network_status
+    resp = self._communicate_network_status(status)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 405, in _communicate_network_status
+    resp = self._communicate(req, local=True)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 226, in _communicate
+    return self._communicate_async(rec, local=local).get(timeout=timeout)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 231, in _communicate_async
+    raise Exception("The wandb backend process has shutdown")
+Exception: The wandb backend process has shutdown
+
+
+
+
+
+
+
+
+ 95%|████████████████████████▋ | 149/157 [00:37<00:02,  3.92it/s, loss=30.4]
+Traceback (most recent call last):
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/tnluser/.config/vimspector-config/gadgets/macos/debugpy/build/lib/debugpy/__main__.py", line 45, in <module>
+    cli.main()
+  File "/Users/tnluser/.config/vimspector-config/gadgets/macos/debugpy/build/lib/debugpy/../debugpy/server/cli.py", line 444, in main
+    run()
+  File "/Users/tnluser/.config/vimspector-config/gadgets/macos/debugpy/build/lib/debugpy/../debugpy/server/cli.py", line 285, in run_file
+    runpy.run_path(target_as_str, run_name=compat.force_str("__main__"))
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/runpy.py", line 268, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/runpy.py", line 97, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/tnluser/PERSONAL/bb/notebooks/BaseTextDetectorModel.py", line 190, in <module>
+    out, loss = model(img.to(device), targets, lengths)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1194, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/Users/tnluser/PERSONAL/bb/notebooks/BaseTextDetectorModel.py", line 122, in forward
+    loss = nn.CTCLoss(blank=0)(log_softmax, targets,
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1194, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/loss.py", line 1756, in forward
+    return F.ctc_loss(log_probs, targets, input_lengths, target_lengths, self.blank, self.reduction,
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/torch/nn/functional.py", line 2628, in ctc_loss
+    return torch.ctc_loss(
+RuntimeError: Expected tensor to have size at least 30 at dimension 1, but got size 29 for argument #2 'targets' (while checking arguments for ctc_loss_cpu)

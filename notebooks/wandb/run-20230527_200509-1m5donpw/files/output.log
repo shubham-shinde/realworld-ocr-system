@@ -1,0 +1,60 @@
+
+    status_response = self._interface.communicate_network_status()
+Problem at: /Users/tnluser/PERSONAL/bb/notebooks/BaseTextDetectorModel.py 149 <module>
+    resp = self._communicate_stop_status(status)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 395, in _communicate_stop_status
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface.py", line 138, in communicate_network_status
+    resp = self._communicate(req, local=True)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 226, in _communicate
+    resp = self._communicate_network_status(status)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 405, in _communicate_network_status
+    return self._communicate_async(rec, local=local).get(timeout=timeout)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 231, in _communicate_async
+    resp = self._communicate(req, local=True)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 226, in _communicate
+    raise Exception("The wandb backend process has shutdown")
+Exception: The wandb backend process has shutdown
+    return self._communicate_async(rec, local=local).get(timeout=timeout)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 231, in _communicate_async
+    raise Exception("The wandb backend process has shutdown")
+Exception: The wandb backend process has shutdown
+Traceback (most recent call last):
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 999, in init
+    run = wi.init()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 687, in init
+    run._on_start()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 1947, in _on_start
+    self._on_ready()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 1962, in _on_ready
+    self._telemetry_flush()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 588, in _telemetry_flush
+    self._backend.interface._publish_telemetry(self._telemetry_obj)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 74, in _publish_telemetry
+    self._publish(rec)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_queue.py", line 49, in _publish
+    raise Exception("The wandb backend process has shutdown")
+Exception: The wandb backend process has shutdown
+[34m[1mwandb[39m[22m: [32m[41mERROR[39m[49m Abnormal program exit
+Traceback (most recent call last):
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 999, in init
+    run = wi.init()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 687, in init
+    run._on_start()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 1947, in _on_start
+    self._on_ready()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 1962, in _on_ready
+    self._telemetry_flush()
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_run.py", line 588, in _telemetry_flush
+    self._backend.interface._publish_telemetry(self._telemetry_obj)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_shared.py", line 74, in _publish_telemetry
+    self._publish(rec)
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/interface/interface_queue.py", line 49, in _publish
+    raise Exception("The wandb backend process has shutdown")
+Exception: The wandb backend process has shutdown
+The above exception was the direct cause of the following exception:
+Traceback (most recent call last):
+  File "/Users/tnluser/PERSONAL/bb/notebooks/BaseTextDetectorModel.py", line 149, in <module>
+    wandb.init(
+  File "/Users/tnluser/opt/anaconda3/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 1037, in init
+    raise Exception("problem") from error_seen
+Exception: problem
