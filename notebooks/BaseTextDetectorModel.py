@@ -196,19 +196,18 @@ def model_out_to_text(string):
     return ''.join(s)
 
 
-if __name__ == '__main__':
-    log = '--log' in sys.argv
+def export_onnx(model_path):
+    model = torch.load(model_path, map_location=torch.device('cpu'))
+    dataset = ImageTextDataset(100)
+    dummy_input = dataset[0][0][None, ...]
+    input_names = ['input']
+    output_names = ['output']
+    torch.onnx.export(model, dummy_input, "BaseTextDetector.onnx", verbose=True,
+                      input_names=input_names, output_names=output_names)
+    # onnx2tf -i BaseTextDetector.onnx -o torch_model
 
-    config = {
-        'learning_rate': 0.001,
-        'epochs': 20,
-        'train_size': (10**4),
-        'lr_step_size': 30,
-        'lr_gamma': 0.8,
-        'batch_size': 32
-    }
 
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+def train(config, log, device):
     model = BaseTextDetector().to(device)
 
     wandb.init(
@@ -290,3 +289,21 @@ if __name__ == '__main__':
         print('epoch_loss', losses[-1])
     wandb.finish()
     torch.save(model, 'BaseTextDetector.pt')
+
+
+if __name__ == '__main__':
+    log = '--log' in sys.argv
+
+    config = {
+        'learning_rate': 0.001,
+        'epochs': 10,
+        'train_size': 5*(10**4),
+        'lr_step_size': 30,
+        'lr_gamma': 0.8,
+        'batch_size': 32
+    }
+
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    # train(config, log, device)
+
+    export_onnx('BaseTextDetector.pt')

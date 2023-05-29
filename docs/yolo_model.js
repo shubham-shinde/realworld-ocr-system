@@ -51,8 +51,8 @@ function preprocessImageData(tensorData) {
 		resized_shape
 	);
 	let pad = [
-		[Math.round(((model_shape[0] - resized_shape[0]) / 2) + 0.1), Math.round(((model_shape[0] - resized_shape[0]) / 2) + 0.1)],
-		[Math.round(((model_shape[1] - resized_shape[1]) / 2) + 0.1), Math.round(((model_shape[1] - resized_shape[1]) / 2) + 0.1)],
+		[Math.round(((model_shape[0] - resized_shape[0]) / 2) + 0.1), Math.round(((model_shape[0] - resized_shape[0]) / 2) - 0.1)],
+		[Math.round(((model_shape[1] - resized_shape[1]) / 2) + 0.1), Math.round(((model_shape[1] - resized_shape[1]) / 2) - 0.1)],
 	]
 
 	// Pad the image to make it 640x640 with a value of 114

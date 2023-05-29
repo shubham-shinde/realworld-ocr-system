@@ -29,44 +29,68 @@ function startVideoCapture() {
 }
 
 // Function to stop video capturing and display captured image on canvas
-async function stopVideoCapture() {
+function stopVideoCapture(drawImage) {
 	const videoElement = document.getElementById('video');
-	const canvasElement = document.getElementById('canvas');
-	const context = canvasElement.getContext('2d');
 	const videoContainer = document.getElementById('videoContainer');
 	const canvasContainer = document.getElementById('canvasContainer');
 	const captureBtn = document.getElementById('capture-btn')
 	const resetBtn = document.getElementById('reset-btn')
-	let height = videoElement.offsetHeight
-	let width = videoElement.offsetWidth
 	// Pause video playback
 	videoElement.pause();
 
-	// Draw current video frame on the canvas
-	canvasElement.height = height
-	canvasElement.width = width
-
-	canvasElement.width = videoElement.videoWidth;
-	canvasElement.height = videoElement.videoHeight;
-	context.drawImage(videoElement, 0, 0);
+	drawImage(videoElement);
 
 	captureBtn.style.display = 'None'
 	videoContainer.style.display = 'None'
 	resetBtn.style.display = 'block'
 	canvasContainer.style.display = 'flex'
 
-	// Convert the captured image to TensorFlow.js tensor
-	const imageTensor = tf.browser.fromPixels(canvasElement);
-	const predictions = await yoloModel.detectObjects(imageTensor)
-	displayBoundingBoxes(predictions, context);
-
 	// Perform further processing with the imageTensor using your TensorFlow.js model
 	// ...
 	// Call your TensorFlow.js model functions or perform predictions here
 
 	// Cleanup: Stop video stream and remove video element srcObject
-	videoElement.srcObject.getTracks()[0].stop();
-	videoElement.srcObject = null;
+	if (videoElement.srcObject) {
+		videoElement.srcObject.getTracks()[0].stop();
+		videoElement.srcObject = null;
+	}
+}
+
+async function loadCaptureImage() {
+	const canvasElement = document.getElementById('canvas');
+	const context = canvasElement.getContext('2d');
+
+	stopVideoCapture((videoElement) => {
+		canvasElement.width = videoElement.videoWidth;
+		canvasElement.height = videoElement.videoHeight;
+		context.drawImage(videoElement, 0, 0);
+		return canvasElement
+	})
+
+	// Convert the captured image to TensorFlow.js tensor
+	const imageTensor = tf.browser.fromPixels(canvasElement);
+	const predictions = await yoloModel.detectObjects(imageTensor)
+	displayBoundingBoxes(predictions, context);
+}
+
+async function loadExampleImage(event) {
+	event.preventDefault();
+	const btn_id = event.target.id;
+
+	const canvasElement = document.getElementById('canvas');
+	const context = canvasElement.getContext('2d');
+
+	stopVideoCapture((_videoElement) => {
+		const image = document.getElementById("img" + btn_id)
+		canvasElement.width = image.width;
+		canvasElement.height = image.height;
+		context.drawImage(image, 0, 0);
+	})
+
+	// Convert the captured image to TensorFlow.js tensor
+	const imageTensor = tf.browser.fromPixels(canvasElement);
+	const predictions = await yoloModel.detectObjects(imageTensor)
+	displayBoundingBoxes(predictions, context);
 }
 
 // Function to display the bounding boxes on the canvas
@@ -90,9 +114,11 @@ function displayBoundingBoxes(predictions, context) {
 
 // Add event listener to the capture button
 const captureBtn = document.getElementById('capture-btn');
-captureBtn.addEventListener('click', stopVideoCapture);
+captureBtn.addEventListener('click', loadCaptureImage);
 const resetBtn = document.getElementById('reset-btn');
 resetBtn.addEventListener('click', startVideoCapture);
+const imgBtns = document.getElementsByClassName('thumbnail')
+for (let imgBtn of imgBtns) imgBtn.addEventListener('click', loadExampleImage)
 
 
 // Start video capturing on page load
