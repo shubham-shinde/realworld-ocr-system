@@ -34,11 +34,14 @@ canvas,
     bottom: 20px;
     z-index: 999;
     display: flex;
+    max-width: 100vw;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .thumbnail {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     margin: 12px;
     border: 4px solid lightgray;
 }
