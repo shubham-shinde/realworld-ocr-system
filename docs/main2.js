@@ -157,11 +157,12 @@ for (let imgBtn of imgBtns) imgBtn.addEventListener('click', (e) => loadExampleI
 
 
 // Start video capturing on page load
-// window.addEventListener('load', startVideoCapture);
-// yoloModel.loadModel()
+window.addEventListener('load', startVideoCapture);
+yoloModel.loadModel()
+detectionModel.loadModel()
 // testing
-window.addEventListener('load', async () => {
-	await yoloModel.loadModel()
-	await detectionModel.loadModel()
-	await loadExampleImage(2)
-});
+// window.addEventListener('load', async () => {
+// 	await yoloModel.loadModel()
+// 	await detectionModel.loadModel()
+// 	await loadExampleImage(2)
+// });
