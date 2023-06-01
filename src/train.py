@@ -3,7 +3,7 @@ from torch import optim
 from tqdm import tqdm
 from pathlib import Path
 from models import get_model
-from datasets import get_dataset
+from dataset import get_dataset
 from helper import model_text, model_out_to_text
 import wandb
 import sys

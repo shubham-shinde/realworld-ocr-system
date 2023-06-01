@@ -6,7 +6,6 @@ wrappers/__pycache__
 .DS_Store
 env
 notebook/.ipynb_checkpoints/
-notebook/datasets
 notebook/runs
 yolov5/runs
 YOLOV8/runs
