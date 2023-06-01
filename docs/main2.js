@@ -17,9 +17,6 @@ function startVideoCapture() {
 		.catch((error) => {
 			console.error('Error accessing camera:', error);
 		});
-	const videoElement = document.getElementById('video');
-	const canvasElement = document.getElementById('canvas');
-	const context = canvasElement.getContext('2d');
 	// function drawImage(video) {
 	// 	context.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
 	// }
@@ -56,6 +53,32 @@ function stopVideoCapture(drawImage) {
 	}
 }
 
+async function textDetection() {
+	const canvasElement = document.getElementById('canvas');
+	let imageTensor = tf.browser.fromPixels(canvasElement);
+
+	// Convert the captured image to TensorFlow.js tensor
+	const predictions = await yoloModel.detectObjects(imageTensor)
+	let textImages = []
+
+
+
+	for (let box of predictions) {
+		let [x1, y1, x2, y2] = box;
+		x1 = Math.floor(x1)
+		x2 = Math.ceil(x2)
+		y1 = Math.floor(y1)
+		y2 = Math.ceil(y2)
+		let [ih, iw, _] = imageTensor.shape
+		let [x, y] = [Math.max(0, x1), Math.max(0, y1)]
+		let [w, h] = [Math.min(x2 - x, iw - x), Math.min(y2 - y, ih - y)]
+		const img = imageTensor.slice([y, x], [h, w])
+		textImages.push(img)
+	}
+	let texts = await detectionModel.detectText(textImages)
+	displayBoundingBoxes(predictions, texts);
+}
+
 async function loadCaptureImage() {
 	const canvasElement = document.getElementById('canvas');
 	const context = canvasElement.getContext('2d');
@@ -67,16 +90,12 @@ async function loadCaptureImage() {
 		return canvasElement
 	})
 
+	await textDetection()
+
 	// Convert the captured image to TensorFlow.js tensor
-	const imageTensor = tf.browser.fromPixels(canvasElement);
-	const predictions = await yoloModel.detectObjects(imageTensor)
-	displayBoundingBoxes(predictions, context);
 }
 
-async function loadExampleImage(event) {
-	event.preventDefault();
-	const btn_id = event.target.id;
-
+async function loadExampleImage(btn_id) {
 	const canvasElement = document.getElementById('canvas');
 	const context = canvasElement.getContext('2d');
 
@@ -87,29 +106,45 @@ async function loadExampleImage(event) {
 		context.drawImage(image, 0, 0);
 	})
 
-	// Convert the captured image to TensorFlow.js tensor
-	const imageTensor = tf.browser.fromPixels(canvasElement);
-	const predictions = await yoloModel.detectObjects(imageTensor)
-	displayBoundingBoxes(predictions, context);
+	await textDetection()
 }
 
 // Function to display the bounding boxes on the canvas
-function displayBoundingBoxes(predictions, context) {
+function displayBoundingBoxes(predictions, texts) {
+	const canvasElement = document.getElementById('canvas');
+	const context = canvasElement.getContext('2d');
+	context.font = "8px Arial";
+	context.fillStyle = 'green';
+	context.strokeStyle = 'red';
+	// Draw rectangle
 	// Draw bounding boxes
-	for (const prediction of predictions) {
-		const [x, y, width, height] = prediction;
-		console.log(x, y, width, height)
+	for (let i in predictions) {
+		i = Number(i)
+		prediction = predictions[i]
+		let text = texts[i]
+		const [x1, y1, x2, y2] = prediction;
+		console.log(x1, y1, x2, y2)
 
 		// Draw rectangle
-		context.strokeStyle = 'red';
 		context.lineWidth = 2;
 		context.beginPath();
-		context.rect(x, y, width - x, height - y);
+		context.rect(x1, y1, x2 - x1, y2 - y1);
+		// context.fillText(text, x1 - 2, y1 - 2);
+		drawTextBG(context, text, '8px Arial', x1, y1)
 		context.stroke();
 
 		// Draw label
-		context.fillStyle = 'red';
 	}
+}
+
+function drawTextBG(ctx, txt, font, x, y) {
+	ctx.font = font;
+	ctx.textBaseline = 'bottom';
+	ctx.fillStyle = 'red';
+	var width = ctx.measureText(txt).width;
+	ctx.fillRect(x, y - parseInt(font, 10), width, parseInt(font, 10));
+	ctx.fillStyle = '#000';
+	ctx.fillText(txt, x, y);
 }
 
 // Add event listener to the capture button
@@ -118,8 +153,15 @@ captureBtn.addEventListener('click', loadCaptureImage);
 const resetBtn = document.getElementById('reset-btn');
 resetBtn.addEventListener('click', startVideoCapture);
 const imgBtns = document.getElementsByClassName('thumbnail')
-for (let imgBtn of imgBtns) imgBtn.addEventListener('click', loadExampleImage)
+for (let imgBtn of imgBtns) imgBtn.addEventListener('click', (e) => loadExampleImage(e.target.id))
 
 
 // Start video capturing on page load
-window.addEventListener('load', startVideoCapture);
+// window.addEventListener('load', startVideoCapture);
+// yoloModel.loadModel()
+// testing
+window.addEventListener('load', async () => {
+	await yoloModel.loadModel()
+	await detectionModel.loadModel()
+	await loadExampleImage(2)
+});

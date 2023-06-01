@@ -1,6 +1,6 @@
 // Define the YOLO model class
-const model_shape = [640, 640]
-const conf = 0.1
+const yolo_model_shape = [640, 640]
+const yolo_conf = 0.1
 class YOLOModel {
 	constructor() {
 		// Define the YOLO model architecture
@@ -44,15 +44,15 @@ function preprocessImageData(tensorData) {
 
 	// Resize the image to 640x640
 	let img_shape = tensorData.shape
-	let resize = Math.min(model_shape[0] / img_shape[0], model_shape[1] / img_shape[1])
+	let resize = Math.min(yolo_model_shape[0] / img_shape[0], yolo_model_shape[1] / img_shape[1])
 	let resized_shape = [Math.ceil(img_shape[0] * resize), Math.ceil(img_shape[1] * resize)]
 	const resizedData = tf.image.resizeBilinear(
 		tensorData,
 		resized_shape
 	);
 	let pad = [
-		[Math.round(((model_shape[0] - resized_shape[0]) / 2) + 0.1), Math.round(((model_shape[0] - resized_shape[0]) / 2) - 0.1)],
-		[Math.round(((model_shape[1] - resized_shape[1]) / 2) + 0.1), Math.round(((model_shape[1] - resized_shape[1]) / 2) - 0.1)],
+		[Math.round(((yolo_model_shape[0] - resized_shape[0]) / 2) + 0.1), Math.round(((yolo_model_shape[0] - resized_shape[0]) / 2) - 0.1)],
+		[Math.round(((yolo_model_shape[1] - resized_shape[1]) / 2) + 0.1), Math.round(((yolo_model_shape[1] - resized_shape[1]) / 2) - 0.1)],
 	]
 
 	// Pad the image to make it 640x640 with a value of 114
@@ -94,7 +94,7 @@ async function postprocessOutputTensor(outputTensor, pad, resize) {
 		model_conf.squeeze(),
 		40, // no of boxes out
 		0.1, // iou threshold
-		conf //score threshold
+		yolo_conf //score threshold
 	)
 	let boxes = all_boxes.gather(box_indexes)
 	let predictions = await boxes.array()
@@ -102,5 +102,4 @@ async function postprocessOutputTensor(outputTensor, pad, resize) {
 }
 
 const yoloModel = new YOLOModel();
-yoloModel.loadModel()
 
