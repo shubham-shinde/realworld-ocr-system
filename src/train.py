@@ -97,7 +97,7 @@ def train(config, log, device):
         scheduler.step()
         print('epoch_loss', losses[-1])
     wandb.finish()
-    torch.save(model, 'Model.pt')
+    torch.save(model, config['model'] + '.pt')
 
 
 if __name__ == '__main__':
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         'lr_step_size': 20,
         'lr_gamma': 0.8,
         'batch_size': 32,
-        'model': 'base',
+        'model': 'v1',
         'dataset': 'mnt'
     }
 
