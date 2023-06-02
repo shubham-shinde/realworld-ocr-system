@@ -9,6 +9,11 @@ import wandb
 import sys
 import os
 
+hashseed = os.getenv('PYTHONHASHSEED')
+if not hashseed:
+    os.environ['PYTHONHASHSEED'] = '0'
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
 absolute_path = Path(os.path.dirname(__file__))
 
 
