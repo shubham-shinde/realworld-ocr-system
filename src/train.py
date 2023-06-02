@@ -100,19 +100,20 @@ def train(config, log, device):
             pbar.set_postfix(
                 {'loss': epoch_loss/batches})
 
-        model.eval()
-        batch_loss = torch.tensor([model(eimg.to(device), etarget.to(device), elen.to(device))[1]
-                                  for eimg, etarget, elen in dataloader]).mean().item()
-        eval_loss = torch.tensor([model(eimg.to(device), etarget.to(device), elen.to(device))[1]
-                                  for eimg, etarget, elen in eval_dataloader]).mean().item()
-        losses.append(batch_loss)
+        with torch.no_grad():
+            model.eval()
+            batch_loss = torch.tensor([model(eimg.to(device), etarget.to(device), elen.to(device))[1]
+                                      for eimg, etarget, elen in dataloader]).mean().item()
+            eval_loss = torch.tensor([model(eimg.to(device), etarget.to(device), elen.to(device))[1]
+                                      for eimg, etarget, elen in eval_dataloader]).mean().item()
+            losses.append(batch_loss)
 
-        print('train')
-        train_acc = calc_acc(model, dataloader, Dataset)
-        print('test')
-        test_acc = calc_acc(model, test_dataloader, Dataset)
-        print('eval')
-        eval_acc = calc_acc(model, eval_dataloader, Dataset)
+            print('train')
+            train_acc = calc_acc(model, dataloader, Dataset)
+            print('test')
+            test_acc = calc_acc(model, test_dataloader, Dataset)
+            print('eval')
+            eval_acc = calc_acc(model, eval_dataloader, Dataset)
 
         pp = {"eval_acc": eval_acc, "batch_loss": batch_loss,
               "test_acc": test_acc, "eval_loss": eval_loss, "train_acc": train_acc}
