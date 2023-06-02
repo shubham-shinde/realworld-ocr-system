@@ -15,15 +15,10 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
     letters = ' ' + STR.ascii_letters + STR.digits
     clasess = len(letters) + 1
 
-    def __init__(self, dataset_path=absolute_path/'../../datasets/mnt/', size=None, only_synt=False):
+    def __init__(self, image_files, only_synt=False):
         super(ImageTextDatasetMNT, self).__init__()
-        result = [os.path.join(dp, f) for dp, dn, filenames in os.walk(
-            dataset_path) for f in filenames if os.path.splitext(f)[1] in ['.jpg', '.jpeg', '.png']]
-        if size is not None:
-            result = result[:size]
-        print('dataset count:', len(result))
         self.web2lowerset = json.load(open(absolute_path / 'words.json'))
-        self.image_files = result
+        self.image_files = image_files
         self.only_synt = only_synt
 
     def generate_random_string(self):
