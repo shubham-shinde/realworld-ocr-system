@@ -124,7 +124,7 @@ def train(config, log, device):
         scheduler.step()
         print('epoch_loss', losses[-1])
     wandb.finish()
-    torch.save(model, config['model'] + '.pt')
+    torch.save(model, f'{config["model"]}.pt')
 
 
 def calc_acc(model, dataloader, Dataset, mx=12):

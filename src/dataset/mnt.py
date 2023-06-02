@@ -27,24 +27,18 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
             f'../../datasets/dt/ImageTextDatasetMNT/data_{str(hash(" ".join(image_files)))}.hdf5'
         if path.exists() == False:
             path.parent.mkdir(parents=True, exist_ok=True)
-            data = {
-                'img': [],
-                'target': [],
-                'len': []
-            }
-            for index in tqdm(range(self.sz), desc='loading dataset'):
-                img, target, ln = self.getitem(index)
-                data['img'].append(img)
-                data['target'].append(target)
-                data['len'].append(ln)
             with h5py.File(path, 'w') as f:
                 img, target, _ = self.getitem(0)
-                f.create_dataset("img", (self.sz, *img.shape),
-                                 dtype='float32', data=torch.stack(data['img']))
+                f.create_dataset("img", (self.sz, *img.shape), dtype='float32')
                 f.create_dataset(
-                    "target", (self.sz, *target.shape), dtype='int64', data=torch.stack(data['target']))
-                f.create_dataset("len", (self.sz,),
-                                 dtype='int64', data=torch.tensor(data['len']))
+                    "target", (self.sz, *target.shape), dtype='int64')
+                f.create_dataset("len", (self.sz,), dtype='int64')
+                for index in tqdm(range(self.sz), desc='loading dataset'):
+                    img, target, ln = self.getitem(index)
+                    f['img'][index] = img
+                    f['target'][index] = target
+                    f['len'][index] = ln
+                f.close()
 
         self.raw_data = h5py.File(path, 'r')
 
