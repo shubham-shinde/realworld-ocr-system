@@ -1,5 +1,6 @@
 import torch
 import json
+from tqdm import tqdm
 import random
 import cv2
 import string as STR
@@ -8,6 +9,7 @@ import os
 import sys
 import traceback
 from importlib import resources
+import h5py
 absolute_path = Path(os.path.dirname(__file__))
 
 
@@ -20,6 +22,31 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
         self.web2lowerset = json.load(open(absolute_path / 'words.json'))
         self.image_files = image_files
         self.only_synt = only_synt
+        self.sz = len(image_files)
+        path = absolute_path / \
+            f'../../datasets/dt/ImageTextDatasetMNT/data_{str(hash(" ".join(image_files)))}.hdf5'
+        if path.exists() == False:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            data = {
+                'img': [],
+                'target': [],
+                'len': []
+            }
+            for index in tqdm(range(self.sz), desc='loading dataset'):
+                img, target, ln = self.getitem(index)
+                data['img'].append(img)
+                data['target'].append(target)
+                data['len'].append(ln)
+            with h5py.File(path, 'w') as f:
+                img, target, _ = self.getitem(0)
+                f.create_dataset("img", (self.sz, *img.shape),
+                                 dtype='float32', data=torch.stack(data['img']))
+                f.create_dataset(
+                    "target", (self.sz, *target.shape), dtype='int64', data=torch.stack(data['target']))
+                f.create_dataset("len", (self.sz,),
+                                 dtype='int64', data=torch.tensor(data['len']))
+
+        self.raw_data = h5py.File(path, 'r')
 
     def generate_random_string(self):
         types = ['nu', 'wo', 'nuwo']
@@ -78,7 +105,7 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
             mid_img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114))
         return torch.tensor(final).to(torch.float32)
 
-    def __getitem__(self, index):
+    def getitem(self, index):
         if self.only_synt == False:
             try:
                 file = self.image_files[index]
@@ -107,6 +134,13 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
         label = torch.tensor(label)
         label += 1
         return img.to(torch.float32), label, max_length
+
+    def __getitem__(self, index):
+        return (
+            torch.tensor(self.raw_data['img'][index]),
+            torch.tensor(self.raw_data['target'][index]),
+            torch.tensor(self.raw_data['len'][index])
+        )
 
 
 if __name__ == '__main__':
