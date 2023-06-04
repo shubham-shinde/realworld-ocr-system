@@ -146,9 +146,12 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
 
 
 if __name__ == '__main__':
-    dataset = ImageTextDatasetMNT(size=100, only_synt=False)
+    files = [os.path.join(dp, f) for dp, _, filenames in os.walk(
+        absolute_path/'../../datasets/mnt/') for f in filenames if os.path.splitext(f)[1] in ['.jpg', '.jpeg', '.png']]
+
+    dataset = ImageTextDatasetMNT(files)
     img, label, ln = dataset[0]
     print('original images:', img.shape, label, ln)
-    dataset = ImageTextDatasetMNT(size=100, only_synt=True)
+    dataset = ImageTextDatasetMNT(files, only_synt=True)
     img, label, ln = dataset[0]
     print('synthetic images:', img.shape, label, ln)

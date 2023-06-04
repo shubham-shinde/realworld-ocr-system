@@ -42,7 +42,7 @@ def train(config, log, device):
 
     model = Model(Dataset.clasess).to(device)
 
-    wandb.init(
+    run = wandb.init(
         # set the wandb project where this run will be logged
         project="text_detector_1",
         config=config,
@@ -81,7 +81,7 @@ def train(config, log, device):
         print('epoch -', epoch)
         lrs.append(optimizer.param_groups[0]['lr'])
         print('learning rate', lrs[-1])
-        pbar = tqdm(dataloader)
+        pbar = tqdm(dataloader, dynamic_ncols=True)
         for img, targets, lengths in pbar:
             model.train()
             targets = targets.to(device)
@@ -128,8 +128,15 @@ def train(config, log, device):
 
         scheduler.step()
         print('epoch_loss', losses[-1])
+
+    model_name_keys = ['model', 'dataset', 'train_size',
+                       'epochs', 'learning_rate', 'batch_size']
+    model_name = ''
+    for k in model_name_keys:
+        model_name += f'{k}-{str(config[k])}_'
+    torch.save(
+        model, f'models/{model_name}.pt')
     wandb.finish()
-    torch.save(model, f'{config["model"]}.pt')
 
 
 def calc_acc(model, dataloader, Dataset, mx=12):
@@ -164,12 +171,12 @@ if __name__ == '__main__':
 
     config = {
         'learning_rate': 0.0001,
-        'epochs': 50,
-        'train_size': 100*(10**4),
-        'eval_size': 10**3,
-        'lr_step_size': 20,
+        'epochs': 100,
+        'train_size': 100 * (10**4),
+        'eval_size': 5 * (10**3),
+        'lr_step_size': 30,
         'lr_gamma': 0.8,
-        'batch_size': 32,
+        'batch_size': 128,
         'model': 'base',
         'dataset': 'mnt'
     }
