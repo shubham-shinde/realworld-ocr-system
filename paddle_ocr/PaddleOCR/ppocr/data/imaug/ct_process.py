@@ -19,7 +19,7 @@ import pyclipper
 import paddle
 
 import numpy as np
-import Polygon as plg
+import shapely.geometry as plg
 import scipy.io as scio
 
 from PIL import Image
@@ -112,10 +112,10 @@ class MakeShrink():
         for i in range(len(bboxes)):
             bboxes[i] = np.reshape(bboxes[i] * (
                 [scale_factor[0], scale_factor[1]] * (bboxes[i].shape[0] // 2)),
-                                   (bboxes[i].shape[0] // 2, 2)).astype('int32')
+                (bboxes[i].shape[0] // 2, 2)).astype('int32')
 
         for i in range(len(bboxes)):
-            #different value for different bbox
+            # different value for different bbox
             cv2.drawContours(gt_instance, [bboxes[i]], -1, i + 1, -1)
 
             # set training mask to 0
@@ -123,7 +123,8 @@ class MakeShrink():
 
             # for not accurate annotation, use training_mask_distance
             if words[i] == '###' or words[i] == '???':
-                cv2.drawContours(training_mask_distance, [bboxes[i]], -1, 0, -1)
+                cv2.drawContours(training_mask_distance,
+                                 [bboxes[i]], -1, 0, -1)
 
         # make shrink
         gt_kernel_instance = np.zeros(img.shape[0:2], dtype='uint8')
@@ -271,7 +272,7 @@ class MakeCentripetalShift():
             np.sum((As[:, np.newaxis, :].repeat(
                 B, axis=1) - Bs[np.newaxis, :, :].repeat(
                     A, axis=0))**2,
-                   axis=-1))
+                axis=-1))
 
         ind = np.argmin(dis, axis=-1)
 
@@ -281,7 +282,7 @@ class MakeCentripetalShift():
         imgs = data['image']
 
         img, gt_instance, training_mask, gt_kernel_instance, gt_kernel, gt_kernel_inner, training_mask_distance = \
-                        imgs[0], imgs[1], imgs[2], imgs[3], imgs[4], imgs[5], imgs[6]
+            imgs[0], imgs[1], imgs[2], imgs[3], imgs[4], imgs[5], imgs[6]
 
         max_instance = np.max(gt_instance)  # num bbox
 
@@ -353,3 +354,4 @@ class ScaleAlignedShort():
         data['image'] = img
 
         return data
+

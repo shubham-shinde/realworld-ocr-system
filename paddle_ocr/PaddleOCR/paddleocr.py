@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from ppstructure.predict_system import StructureSystem, save_structure_res, to_excel
+from ppstructure.utility import init_args, draw_structure_result
+from tools.infer.utility import draw_ocr, str2bool, check_gpu
+from ppocr.utils.network import maybe_download, download_with_progressbar, is_link, confirm_model_dir_url
+from ppocr.utils.utility import check_and_read, get_image_file_list
+from ppocr.utils.logging import get_logger
+from tools.infer import predict_system
+from pathlib import Path
+import numpy as np
+import logging
+import cv2
 import os
 import sys
 import importlib
@@ -22,24 +33,13 @@ import paddle
 
 sys.path.append(os.path.join(__dir__, ''))
 
-import cv2
-import logging
-import numpy as np
-from pathlib import Path
 
 tools = importlib.import_module('.', 'tools')
 ppocr = importlib.import_module('.', 'ppocr')
 ppstructure = importlib.import_module('.', 'ppstructure')
 
-from tools.infer import predict_system
-from ppocr.utils.logging import get_logger
 
 logger = get_logger()
-from ppocr.utils.utility import check_and_read, get_image_file_list
-from ppocr.utils.network import maybe_download, download_with_progressbar, is_link, confirm_model_dir_url
-from tools.infer.utility import draw_ocr, str2bool, check_gpu
-from ppstructure.utility import init_args, draw_structure_result
-from ppstructure.predict_system import StructureSystem, save_structure_res, to_excel
 
 __all__ = [
     'PaddleOCR', 'PPStructure', 'draw_ocr', 'draw_structure_result',
@@ -628,7 +628,8 @@ class PPStructure(StructureSystem):
 
 def main():
     # for cmd
-    args = parse_args(mMain=True)
+    args = parse_args(mMain=False)
+    args.image_dir = '../../docs/assets'
     image_dir = args.image_dir
     if is_link(image_dir):
         download_with_progressbar(image_dir, 'tmp.jpg')
@@ -720,3 +721,7 @@ def main():
                 item.pop('res')
                 logger.info(item)
             logger.info('result save to {}'.format(args.output))
+
+
+if __name__ == '__main__':
+    main()

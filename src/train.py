@@ -50,11 +50,11 @@ def train(config, log, device):
     )
 
     # dataset
-    dataset = Dataset(train_img_files, only_synt=False)
+    dataset = Dataset(train_img_files, only_synt=False, gray=False)
 
-    eval_dataset = Dataset(eval_image_files, only_synt=False)
+    eval_dataset = Dataset(eval_image_files, only_synt=False, gray=False)
 
-    test_dataset = Dataset(test_image_files, only_synt=False)
+    test_dataset = Dataset(test_image_files, only_synt=False, gray=False)
 
     test_dataloader = torch.utils.data.DataLoader(
         test_dataset, batch_size=12, shuffle=True)
@@ -172,12 +172,12 @@ if __name__ == '__main__':
     config = {
         'learning_rate': 0.0001,
         'epochs': 100,
-        'train_size': 100 * (10**4),
+        'train_size': 50 * (10**1),
         'eval_size': 5 * (10**3),
         'lr_step_size': 30,
         'lr_gamma': 0.8,
-        'batch_size': 128,
-        'model': 'base',
+        'batch_size': 32,
+        'model': 'mv3_l',
         'dataset': 'mnt'
     }
 

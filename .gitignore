@@ -9,6 +9,7 @@ notebook/.ipynb_checkpoints/
 notebook/runs
 yolov5/runs
 YOLOV8/runs
+src/wandb
 
 search_env
 #Ignore temp and swp files

@@ -17,14 +17,18 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
     letters = ' ' + STR.ascii_letters + STR.digits
     clasess = len(letters) + 1
 
-    def __init__(self, image_files, only_synt=False):
+    def __init__(self, image_files, only_synt=False, gray=True):
         super(ImageTextDatasetMNT, self).__init__()
         self.web2lowerset = json.load(open(absolute_path / 'words.json'))
         self.image_files = image_files
         self.only_synt = only_synt
         self.sz = len(image_files)
+        self.gray = gray
+        path_name = str(hash(" ".join(image_files)))
+        if gray == False:
+            path_name += '_non_gray'
         path = absolute_path / \
-            f'../../datasets/dt/ImageTextDatasetMNT/data_{str(hash(" ".join(image_files)))}.hdf5'
+            f'../../datasets/dt/ImageTextDatasetMNT/data_{path_name}.hdf5'
         if path.exists() == False:
             path.parent.mkdir(parents=True, exist_ok=True)
             with h5py.File(path, 'w') as f:
@@ -108,7 +112,10 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
                 file = self.image_files[index]
                 img = cv2.imread(file)
                 string = file.split('/')[-1].split('.')[0].split('_')[1]
-                img = self.pretransform(img).mean(-1)[..., None]
+                if self.gray:
+                    img = self.pretransform(img).mean(-1)[..., None]
+                else:
+                    img = self.pretransform(img)
             except:
                 traceback.print_exc()
                 print('Error generating data:', file)
