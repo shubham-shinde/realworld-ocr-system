@@ -38,9 +38,22 @@ def train(config, log, device):
           'eval_data_sz: ', len(eval_image_files))
 
     Model = get_model(config['model'])
-    Dataset = get_dataset(config['dataset'])
+    Dataset = get_dataset(config, input_size=Model.input_size)
 
-    model = Model(Dataset.clasess).to(device)
+    # dataset
+    dataset = Dataset(train_img_files)
+
+    eval_dataset = Dataset(eval_image_files)
+
+    test_dataset = Dataset(test_image_files)
+
+    test_dataloader = torch.utils.data.DataLoader(
+        test_dataset, batch_size=12, shuffle=True)
+    eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=256)
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=config['batch_size'], shuffle=True)
+
+    model = Model(dataset.clasess).to(device)
 
     run = wandb.init(
         # set the wandb project where this run will be logged
@@ -49,19 +62,6 @@ def train(config, log, device):
         mode='disabled' if log == False else 'run'
     )
 
-    # dataset
-    dataset = Dataset(train_img_files, only_synt=False, gray=False)
-
-    eval_dataset = Dataset(eval_image_files, only_synt=False, gray=False)
-
-    test_dataset = Dataset(test_image_files, only_synt=False, gray=False)
-
-    test_dataloader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=12, shuffle=True)
-    eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=256)
-    dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=config['batch_size'])
-
     # model test
     # for img, label, lengths in eval_dataloader:
     #     out, loss = model(img, targets=label, lengths=lengths)
@@ -69,8 +69,8 @@ def train(config, log, device):
 
     # # train setting
     optimizer = optim.Adam(model.parameters(), lr=config['learning_rate'])
-    scheduler = optim.lr_scheduler.StepLR(
-        optimizer, step_size=config['lr_step_size'], gamma=config['lr_gamma'])
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=1000, eta_min=0, last_epoch=-1)
 
     # train loop
     lrs = []
@@ -103,7 +103,10 @@ def train(config, log, device):
 
             # eval_loss calculation
             pbar.set_postfix(
-                {'loss': epoch_loss/batches})
+                {
+                    'eloss': epoch_loss/batches,
+                    'loss': loss.item()
+                })
 
         with torch.no_grad():
             model.eval()
@@ -114,11 +117,11 @@ def train(config, log, device):
             losses.append(batch_loss)
 
             print('train')
-            train_acc = calc_acc(model, dataloader, Dataset)
+            train_acc = calc_acc(model, dataloader)
             print('test')
-            test_acc = calc_acc(model, test_dataloader, Dataset)
+            test_acc = calc_acc(model, test_dataloader)
             print('eval')
-            eval_acc = calc_acc(model, eval_dataloader, Dataset)
+            eval_acc = calc_acc(model, eval_dataloader)
 
         pp = {"eval_acc": eval_acc, "batch_loss": batch_loss,
               "test_acc": test_acc, "eval_loss": eval_loss, "train_acc": train_acc}
@@ -139,20 +142,20 @@ def train(config, log, device):
     wandb.finish()
 
 
-def calc_acc(model, dataloader, Dataset, mx=12):
+def calc_acc(model, dataloader, mx=12):
     model.eval()
     eval_acc = 0
     for img, target, lengths in dataloader:
         out, tloss = model(img.to(device), target.to(
             device), lengths.to(device))
-        print('test_loss:', tloss)
+        print('loss:', tloss)
         acc = 0
         words = 0
         counter = 0
         for ot, tg in zip(out.cpu().transpose(0, 1), target):
             counter += 1
-            tg = model_text(tg, Dataset.letters)
-            ot = model_text(ot.squeeze(), Dataset.letters,
+            tg = model_text(tg, dataloader.dataset.letters)
+            ot = model_text(ot.squeeze(), dataloader.dataset.letters,
                             max_needed=True)
             rot = model_out_to_text(ot)
             for i, w in enumerate(tg):
@@ -172,13 +175,11 @@ if __name__ == '__main__':
     config = {
         'learning_rate': 0.0001,
         'epochs': 100,
-        'train_size': 50 * (10**1),
+        'train_size': 50 * (10**4),
         'eval_size': 5 * (10**3),
-        'lr_step_size': 30,
-        'lr_gamma': 0.8,
         'batch_size': 32,
-        'model': 'mv3_l',
-        'dataset': 'mnt'
+        'model': 'mv3_s',
+        'dataset': 'synth'
     }
 
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'

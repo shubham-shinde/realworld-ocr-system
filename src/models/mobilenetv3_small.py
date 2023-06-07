@@ -13,6 +13,15 @@ class PrintSize(nn.Module):
         return x
 
 
+class BreakPoint(nn.Module):
+    def __init__(self):
+        super(BreakPoint, self).__init__()
+
+    def forward(self, x):
+        print(x.shape)
+        return x
+
+
 class hswish(nn.Module):
     def forward(self, x):
         out = x * F.relu6(x + 6, inplace=True)/6
@@ -31,15 +40,15 @@ class SeModule(nn.Module):  # Squeeze and Excite
         expand_size = max(in_size//reduction, 8)
         self.se = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            PrintSize(),
+            # PrintSize(),
             nn.Conv2d(in_size, expand_size, kernel_size=1, bias=False),
-            PrintSize(),
+            # PrintSize(),
             nn.BatchNorm2d(expand_size),
-            PrintSize(),
+            # PrintSize(),
             nn.ReLU(inplace=True),
-            PrintSize(),
+            # PrintSize(),
             nn.Conv2d(expand_size, in_size, kernel_size=1, bias=False),
-            PrintSize(),
+            # PrintSize(),
             nn.Hardsigmoid()
         )
         self.in_size = in_size
@@ -78,25 +87,25 @@ class Block(nn.Module):
                 nn.BatchNorm2d(out_size)
             )
 
-        if stride == 2 and in_size != out_size:
+        if (stride == 2 or (type(stride) != int and 2 in stride)) and in_size != out_size:
             self.skip = nn.Sequential(
                 nn.Conv2d(in_channels=in_size, out_channels=in_size,
-                          kernel_size=3, groups=in_size, stride=2, padding=1, bias=False),
-                PrintSize(),
+                          kernel_size=3, groups=in_size, stride=stride, padding=1, bias=False),
+                # PrintSize(),
                 nn.BatchNorm2d(in_size),
-                PrintSize(),
+                # PrintSize(),
                 nn.Conv2d(in_size, out_size, kernel_size=1, bias=False),
-                PrintSize(),
+                # PrintSize(),
                 nn.BatchNorm2d(out_size)
             )
 
-        if stride == 2 and in_size == out_size:
+        if (stride == 2 or (type(stride) != int and 2 in stride)) and in_size == out_size:
             self.skip = nn.Sequential(
                 nn.Conv2d(in_channels=in_size, out_channels=out_size,
-                          kernel_size=3, groups=in_size, stride=2, padding=1, bias=False),
-                PrintSize(),
+                          kernel_size=3, groups=in_size, stride=stride, padding=1, bias=False),
+                # PrintSize(),
                 nn.BatchNorm2d(out_size),
-                PrintSize(),
+                # PrintSize(),
             )
 
     def forward(self, x):
@@ -111,12 +120,12 @@ class Block(nn.Module):
         return self.act3(out + skip)
 
 
-class MobileNetV3_Large(nn.Module):
-    input_size = (224, 224, 3)
+class MobileNetV3_Small(nn.Module):
+    input_size = (32, 320, 3)
 
     def __init__(self, num_classes, act=nn.Hardswish):
-        super(MobileNetV3_Large, self).__init__()
-        # input = 224 * 224 * 3
+        super(MobileNetV3_Small, self).__init__()
+        # input = 32 * 320 * 3
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3,
                                stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(16)
@@ -124,61 +133,48 @@ class MobileNetV3_Large(nn.Module):
 
         self.bneck = nn.Sequential(
             Block(kernel_size=3, in_size=16, expand_size=16,
-                  out_size=16, act=nn.ReLU, se=False, stride=1),
+                  out_size=16, act=nn.ReLU, se=True, stride=(1, 1)),
             PrintSize(),
-            Block(kernel_size=3, in_size=16, expand_size=64,
-                  out_size=24, act=nn.ReLU, se=False, stride=2),
+            Block(kernel_size=3, in_size=16, expand_size=72,
+                  out_size=24, act=nn.ReLU, se=False, stride=(2, 1)),
             PrintSize(),
-            Block(kernel_size=3, in_size=24, expand_size=72,
+            Block(kernel_size=3, in_size=24, expand_size=88,
                   out_size=24, act=nn.ReLU, se=False, stride=1),
             PrintSize(),
-            Block(kernel_size=5, in_size=24, expand_size=72,
-                  out_size=40, act=nn.ReLU, se=True, stride=2),
+            Block(kernel_size=5, in_size=24, expand_size=96,
+                  out_size=40, act=act, se=True, stride=(2, 1)),
+            PrintSize(),
+            Block(kernel_size=5, in_size=40, expand_size=240,
+                  out_size=40, act=act, se=True, stride=1),
+            PrintSize(),
+            Block(kernel_size=5, in_size=40, expand_size=240,
+                  out_size=40, act=act, se=True, stride=1),
             PrintSize(),
             Block(kernel_size=5, in_size=40, expand_size=120,
-                  out_size=40, act=nn.ReLU, se=True, stride=1),
+                  out_size=48, act=act, se=True, stride=1),
             PrintSize(),
-            Block(kernel_size=5, in_size=40, expand_size=120,
-                  out_size=40, act=nn.ReLU, se=True, stride=1),
+            Block(kernel_size=5, in_size=48, expand_size=144,
+                  out_size=48, act=act, se=True, stride=1),
             PrintSize(),
-            Block(kernel_size=3, in_size=40, expand_size=240,
-                  out_size=80, act=act, se=False, stride=2),
+            Block(kernel_size=5, in_size=48, expand_size=288,
+                  out_size=96, act=act, se=True, stride=(2, 1)),
             PrintSize(),
-            Block(kernel_size=3, in_size=80, expand_size=200,
-                  out_size=80, act=act, se=False, stride=1),
+            Block(kernel_size=5, in_size=96, expand_size=576,
+                  out_size=96, act=act, se=True, stride=1),
             PrintSize(),
-            Block(kernel_size=3, in_size=80, expand_size=184,
-                  out_size=80, act=act, se=False, stride=1),
-            PrintSize(),
-            Block(kernel_size=3, in_size=80, expand_size=184,
-                  out_size=80, act=act, se=False, stride=1),
-            PrintSize(),
-            Block(kernel_size=3, in_size=80, expand_size=480,
-                  out_size=112, act=act, se=True, stride=1),
-            PrintSize(),
-            Block(kernel_size=3, in_size=112, expand_size=672,
-                  out_size=112, act=act, se=True, stride=1),
-            PrintSize(),
-            Block(kernel_size=5, in_size=112, expand_size=672,
-                  out_size=160, act=act, se=True, stride=2),
-            PrintSize(),
-            Block(kernel_size=5, in_size=160, expand_size=672,
-                  out_size=160, act=act, se=True, stride=1),
-            PrintSize(),
-            Block(kernel_size=5, in_size=160, expand_size=960,
-                  out_size=160, act=act, se=True, stride=1),
+            Block(kernel_size=5, in_size=96, expand_size=576,
+                  out_size=96, act=act, se=True, stride=1),
             PrintSize(),
         )
 
-        self.conv2 = nn.Conv2d(160, 480, kernel_size=1,
-                               stride=(2, 1), padding=0, bias=False)
-        self.bn2 = nn.BatchNorm2d(480)
+        self.conv2 = nn.Conv2d(96, 576, kernel_size=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(576)
         self.hs2 = act(inplace=True)
-        self.gap = nn.AdaptiveAvgPool2d((1, 40))
+        self.gap = nn.AdaptiveAvgPool2d((1, 80))
 
-        self.lstm = nn.LSTM(480, 64, bidirectional=True,
+        self.lstm = nn.LSTM(576, 48, bidirectional=True,
                             num_layers=2, dropout=0.2)
-        self.linear3 = nn.Linear(128, num_classes)
+        self.linear3 = nn.Linear(96, num_classes)
         self.init_params()
 
     def init_params(self):
@@ -223,12 +219,12 @@ class MobileNetV3_Large(nn.Module):
 
 if __name__ == '__main__':
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    model = MobileNetV3_Large(63).to(device)
+    model = MobileNetV3_Small(63).to(device)
     # b, c, h, w
-    model_input = torch.rand([2, 3, 32, 128])
+    model_input = torch.rand([2, 3, 32, 320])
     model_output, loss = model(model_input)
     print('without target: ', model_output.shape, loss)
-    model_input = torch.rand([2, 3, 32, 128])
+    model_input = torch.rand([2, 3, 32, 320])
     model_target = torch.randint(0, 64, (2, 20))
     model_output, loss = model(model_input, model_target)
     print('with target: ', model_output.shape, loss)

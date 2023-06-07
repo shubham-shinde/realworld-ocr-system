@@ -3,6 +3,8 @@ from torch import nn
 
 
 class BaseTextDetector(nn.Module):
+    input_size = (32, 128, 1)
+
     def __init__(self, all_classes):
         super(BaseTextDetector, self).__init__()
         # input 32 * 128 * 1

@@ -5,11 +5,12 @@ logs
 wrappers/__pycache__
 .DS_Store
 env
-notebook/.ipynb_checkpoints/
-notebook/runs
+notebooks/.ipynb_checkpoints/
+notebooks/runs
 yolov5/runs
 YOLOV8/runs
 src/wandb
+src/models/*.pt
 
 search_env
 #Ignore temp and swp files
