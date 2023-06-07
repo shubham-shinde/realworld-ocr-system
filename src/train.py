@@ -123,8 +123,14 @@ def train(config, log, device):
             print('eval')
             eval_acc = calc_acc(model, eval_dataloader)
 
-        pp = {"eval_acc": eval_acc, "batch_loss": batch_loss,
-              "test_acc": test_acc, "eval_loss": eval_loss, "train_acc": train_acc}
+        pp = {
+            "eval_acc": eval_acc,
+            "batch_loss": batch_loss,
+            "test_acc": test_acc,
+            "eval_loss": eval_loss,
+            "train_acc": train_acc,
+            "lr": optimizer.param_groups[0]['lr']
+        }
 
         print(pp)
         wandb.log(pp)
