@@ -5,11 +5,15 @@ from torch.nn import init
 
 
 class PrintSize(nn.Module):
-    def __init__(self):
+    def __init__(self, num=None):
         super(PrintSize, self).__init__()
+        self.num = num
 
     def forward(self, x):
-        # print(x.shape)
+        # if self.num:
+        #     print(self.num, x.shape)
+        # else:
+        #     print(x.shape)
         return x
 
 
@@ -40,15 +44,15 @@ class SeModule(nn.Module):  # Squeeze and Excite
         expand_size = max(in_size//reduction, 8)
         self.se = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            # PrintSize(),
+            PrintSize('se1'),
             nn.Conv2d(in_size, expand_size, kernel_size=1, bias=False),
-            # PrintSize(),
+            PrintSize('se2'),
             nn.BatchNorm2d(expand_size),
-            # PrintSize(),
+            PrintSize('se3'),
             nn.ReLU(inplace=True),
-            # PrintSize(),
+            PrintSize('se4'),
             nn.Conv2d(expand_size, in_size, kernel_size=1, bias=False),
-            # PrintSize(),
+            PrintSize('se5'),
             nn.Hardsigmoid()
         )
         self.in_size = in_size
@@ -91,11 +95,11 @@ class Block(nn.Module):
             self.skip = nn.Sequential(
                 nn.Conv2d(in_channels=in_size, out_channels=in_size,
                           kernel_size=3, groups=in_size, stride=stride, padding=1, bias=False),
-                # PrintSize(),
+                PrintSize('bs1'),
                 nn.BatchNorm2d(in_size),
-                # PrintSize(),
+                PrintSize('bs2'),
                 nn.Conv2d(in_size, out_size, kernel_size=1, bias=False),
-                # PrintSize(),
+                PrintSize('bs3'),
                 nn.BatchNorm2d(out_size)
             )
 
@@ -103,17 +107,24 @@ class Block(nn.Module):
             self.skip = nn.Sequential(
                 nn.Conv2d(in_channels=in_size, out_channels=out_size,
                           kernel_size=3, groups=in_size, stride=stride, padding=1, bias=False),
-                # PrintSize(),
+                PrintSize('bs4'),
                 nn.BatchNorm2d(out_size),
-                # PrintSize(),
+                PrintSize('bs5'),
             )
+        self.print = PrintSize('b')
 
     def forward(self, x):
         skip = x
         out = self.act1(self.bn1(self.conv1(x)))
+
+        out = self.print(out)
         out = self.act2(self.bn2(self.conv2(out)))
+
+        out = self.print(out)
         out = self.se(out)
         out = self.bn3(self.conv3(out))
+
+        out = self.print(out)
 
         if self.skip is not None:
             skip = self.skip(skip)
@@ -134,37 +145,37 @@ class MobileNetV3_Small(nn.Module):
         self.bneck = nn.Sequential(
             Block(kernel_size=3, in_size=16, expand_size=16,
                   out_size=16, act=nn.ReLU, se=True, stride=(1, 1)),
-            PrintSize(),
+            PrintSize('mb1'),
             Block(kernel_size=3, in_size=16, expand_size=72,
                   out_size=24, act=nn.ReLU, se=False, stride=(2, 1)),
-            PrintSize(),
+            PrintSize('mb2'),
             Block(kernel_size=3, in_size=24, expand_size=88,
                   out_size=24, act=nn.ReLU, se=False, stride=1),
-            PrintSize(),
+            PrintSize('mb3'),
             Block(kernel_size=5, in_size=24, expand_size=96,
                   out_size=40, act=act, se=True, stride=(2, 1)),
-            PrintSize(),
+            PrintSize('mb4'),
             Block(kernel_size=5, in_size=40, expand_size=240,
                   out_size=40, act=act, se=True, stride=1),
-            PrintSize(),
+            PrintSize('mb5'),
             Block(kernel_size=5, in_size=40, expand_size=240,
                   out_size=40, act=act, se=True, stride=1),
-            PrintSize(),
+            PrintSize('mb6'),
             Block(kernel_size=5, in_size=40, expand_size=120,
                   out_size=48, act=act, se=True, stride=1),
-            PrintSize(),
+            PrintSize('mb7'),
             Block(kernel_size=5, in_size=48, expand_size=144,
                   out_size=48, act=act, se=True, stride=1),
-            PrintSize(),
+            PrintSize('mb8'),
             Block(kernel_size=5, in_size=48, expand_size=288,
                   out_size=96, act=act, se=True, stride=(2, 1)),
-            PrintSize(),
+            PrintSize('mb9'),
             Block(kernel_size=5, in_size=96, expand_size=576,
                   out_size=96, act=act, se=True, stride=1),
-            PrintSize(),
+            PrintSize('mb10'),
             Block(kernel_size=5, in_size=96, expand_size=576,
                   out_size=96, act=act, se=True, stride=1),
-            PrintSize(),
+            PrintSize('mb11'),
         )
 
         self.conv2 = nn.Conv2d(96, 576, kernel_size=1, bias=False)
@@ -176,6 +187,7 @@ class MobileNetV3_Small(nn.Module):
                             num_layers=2, dropout=0.2)
         self.linear3 = nn.Linear(96, num_classes)
         self.init_params()
+        self.print = PrintSize('m')
 
     def init_params(self):
         for m in self.modules():
@@ -193,15 +205,35 @@ class MobileNetV3_Small(nn.Module):
 
     def forward(self, x, targets=None, lengths=None):
         bs, c, h, w = x.size()
+
+        x = self.print(x)
         out = self.hs1(self.bn1(self.conv1(x)))
+
+        out = self.print(out)
         out = self.bneck(out)
+
+        out = self.print(out)
         out = self.hs2(self.bn2(self.conv2(out)))
+
+        out = self.print(out)
         out = self.gap(out)
+
+        out = self.print(out)
         out = out.permute([0, 3, 1, 2])
+
+        out = self.print(out)
         out = out.view(bs, out.size(1), -1)
+
+        out = self.print(out)
         out, _ = self.lstm(out)
+
+        out = self.print(out)
         out = self.linear3(out)
+
+        out = self.print(out)
         x = out.permute([1, 0, 2])
+
+        out = self.print(out)
 
         if targets is not None:
             log_softmax = nn.LogSoftmax(dim=2)(x)

@@ -57,7 +57,7 @@ class ImageTextDatasetSynt(torch.utils.data.Dataset):
 
     def generate_random_text_image(self):
         string = self.generate_random_string()
-        img = torch.zeros((32, 128, 3))
+        img = torch.zeros((32, 14 * len(string), 3))
         font = cv2.FONT_HERSHEY_SIMPLEX
         org = (0, 24)
         fontScale = 0.6
@@ -81,6 +81,10 @@ class ImageTextDatasetSynt(torch.utils.data.Dataset):
                           ), int(round(pd_sz[0]/2 + 0.1))
         left, right = int(round(pd_sz[1]/2 - 0.1)
                           ), int(round(pd_sz[1]/2 + 0.1))
+        randomness = random.choice(
+            [random.randint(0, left), random.randint(-right, 0)])
+        left -= randomness
+        right += randomness
         final = cv2.copyMakeBorder(
             mid_img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114))
         return torch.tensor(final).to(torch.float32)
