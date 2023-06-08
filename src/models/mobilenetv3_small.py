@@ -181,7 +181,7 @@ class MobileNetV3_Small(nn.Module):
         self.conv2 = nn.Conv2d(96, 576, kernel_size=1, bias=False)
         self.bn2 = nn.BatchNorm2d(576)
         self.hs2 = act(inplace=True)
-        self.gap = nn.AvgPool2d(2)
+        self.gap = nn.MaxPool2d(2)
 
         self.lstm = nn.LSTM(576, 48, bidirectional=True,
                             num_layers=2, dropout=0.2)

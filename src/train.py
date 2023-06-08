@@ -184,7 +184,7 @@ if __name__ == '__main__':
         'train_size': 50 * (10**4),
         'eval_size': 5 * (10**3),
         'batch_size': 32,
-        'model': 'mv3_s',
+        'model': 'mv3_l',
         'dataset': 'synth'
     }
 
