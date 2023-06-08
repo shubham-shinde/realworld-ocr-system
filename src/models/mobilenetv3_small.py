@@ -132,7 +132,7 @@ class Block(nn.Module):
 
 
 class MobileNetV3_Small(nn.Module):
-    input_size = (32, 320, 3)
+    input_size = (3, 32, 256)
 
     def __init__(self, num_classes, act=nn.Hardswish):
         super(MobileNetV3_Small, self).__init__()
@@ -253,10 +253,10 @@ if __name__ == '__main__':
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     model = MobileNetV3_Small(63).to(device)
     # b, c, h, w
-    model_input = torch.rand([2, 3, 32, 320])
+    model_input = torch.rand([2, *MobileNetV3_Small.input_size])
     model_output, loss = model(model_input)
     print('without target: ', model_output.shape, loss)
-    model_input = torch.rand([2, 3, 32, 320])
+    model_input = torch.rand([2, *MobileNetV3_Small.input_size])
     model_target = torch.randint(0, 64, (2, 20))
     model_output, loss = model(model_input, model_target)
     print('with target: ', model_output.shape, loss)

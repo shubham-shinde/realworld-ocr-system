@@ -3,7 +3,7 @@ from torch import nn
 
 
 class ModelV1(nn.Module):
-    input_size = (32, 128, 1)
+    input_size = (1, 32, 128)
 
     def __init__(self, all_classes):
         super(ModelV1, self).__init__()

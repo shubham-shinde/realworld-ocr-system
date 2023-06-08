@@ -3,8 +3,8 @@ from .synth import ImageTextDatasetSynt
 
 
 def get_dataset(config, input_size):
-    dimention = (input_size[0], input_size[1])
-    is_gray = input_size[2] == 1
+    dimention = (input_size[1], input_size[2])
+    is_gray = input_size[0] == 1
     name = config['dataset']
     if name == 'mnt':
         return lambda x: ImageTextDatasetMNT(x, gray=is_gray, out_size=dimention)

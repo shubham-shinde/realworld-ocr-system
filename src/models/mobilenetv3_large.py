@@ -112,7 +112,7 @@ class Block(nn.Module):
 
 
 class MobileNetV3_Large(nn.Module):
-    input_size = (224, 224, 3)
+    input_size = (3, 224, 224)
 
     def __init__(self, num_classes, act=nn.Hardswish):
         super(MobileNetV3_Large, self).__init__()
