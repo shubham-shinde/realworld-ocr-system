@@ -239,12 +239,11 @@ class MobileNetV3_Small(nn.Module):
             log_softmax = nn.LogSoftmax(dim=2)(x)
             input_length = torch.full(
                 size=(bs, ), fill_value=log_softmax.size(0), dtype=torch.int32)
-            output_length = torch.full(
-                size=(bs, ), fill_value=targets.size(1), dtype=torch.int32
-            )
-            # print(lengths)
+            # output_length = torch.full(
+            #     size=(bs, ), fill_value=targets.size(1), dtype=torch.int32
+            # )
             loss = nn.CTCLoss(blank=0)(log_softmax, targets,
-                                       input_length, output_length)
+                                       input_length, lengths)
             return x, loss
         return x, None
 
@@ -254,9 +253,11 @@ if __name__ == '__main__':
     model = MobileNetV3_Small(63).to(device)
     # b, c, h, w
     model_input = torch.rand([2, *MobileNetV3_Small.input_size])
-    model_output, loss = model(model_input)
+    lengths = torch.randint(4, 15, (2,))
+    model_output, loss = model(model_input, lengths=lengths)
     print('without target: ', model_output.shape, loss)
     model_input = torch.rand([2, *MobileNetV3_Small.input_size])
     model_target = torch.randint(0, 64, (2, 20))
-    model_output, loss = model(model_input, model_target)
+    lengths = torch.randint(4, 15, (2,))
+    model_output, loss = model(model_input, model_target, lengths)
     print('with target: ', model_output.shape, loss)
