@@ -88,7 +88,7 @@ class BaseTextDetector(nn.Module):
             )
             # print(lengths)
             loss = nn.CTCLoss(blank=0)(log_softmax, targets,
-                                       input_length, output_length)
+                                       input_length, lengths)
             return x, loss
         return x, None
 
@@ -97,9 +97,11 @@ if __name__ == '__main__':
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     model = BaseTextDetector(64).to(device)
     model_input = torch.rand([1, 1, 32, 128])
-    model_output, loss = model(model_input)
+    lengths = torch.tensor([6])
+    model_output, loss = model(model_input, lengths=lengths)
     print('without target: ', model_output.shape, loss)
     model_input = torch.rand([1, 1, 32, 128])
     model_target = torch.randint(0, 64, (1, 20))
-    model_output, loss = model(model_input, model_target)
+    lengths = torch.tensor([6])
+    model_output, loss = model(model_input, model_target, lengths=lengths)
     print('with target: ', model_output.shape, loss)
