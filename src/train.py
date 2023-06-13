@@ -184,8 +184,8 @@ if __name__ == '__main__':
         'train_size': 50 * (10**4),
         'eval_size': 5 * (10**3),
         'batch_size': 32,
-        'model': 'mv3_l',
-        'dataset': 'synth'
+        'model': 'base',
+        'dataset': 'synth_resized'
     }
 
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'

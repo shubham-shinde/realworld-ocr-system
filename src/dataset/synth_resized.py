@@ -87,7 +87,7 @@ class ImageTextDatasetSyntResized(torch.utils.data.Dataset):
         string = list(string.replace('-', '').replace('.', ''))
         label = []
         max_length = 15
-        for i in range(max_length):
+        for i in range(len(string)):
             label.append(
                 self.letters.index(string[i]) if len(string) > i else -1
             )
