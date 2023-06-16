@@ -48,9 +48,9 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
                 f.close()
 
         self.raw_data = h5py.File(path, 'r')
-        self.img = list(self.raw_data['img'])
-        self.target = list(self.raw_data['target'])
-        self.ln = list(self.raw_data['len'])
+        # self.img = list(self.raw_data['img'])
+        # self.target = list(self.raw_data['target'])
+        # self.ln = list(self.raw_data['len'])
 
     def generate_random_string(self):
         types = ['nu', 'wo', 'nuwo']
@@ -144,16 +144,16 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
         return img.to(torch.float32), label, max_length
 
     def __getitem__(self, index):
-        # return (
-        #     torch.tensor(self.raw_data['img'][index]),
-        #     torch.tensor(self.raw_data['target'][index]),
-        #     torch.tensor(self.raw_data['len'][index])
-        # )
         return (
-            torch.tensor(self.img[index]),
-            torch.tensor(self.target[index]),
-            torch.tensor(self.ln[index]),
+            torch.tensor(self.raw_data['img'][index]),
+            torch.tensor(self.raw_data['target'][index]),
+            torch.tensor(self.raw_data['len'][index])
         )
+        # return (
+        #     torch.tensor(self.img[index]),
+        #     torch.tensor(self.target[index]),
+        #     torch.tensor(self.ln[index]),
+        # )
 
 
 if __name__ == '__main__':
