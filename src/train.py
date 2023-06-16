@@ -51,7 +51,7 @@ def train(config, log, device):
         test_dataset, batch_size=12, shuffle=True)
     eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=256)
     dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=config['batch_size'], shuffle=True)
+        dataset, batch_size=config['batch_size'])
 
     model = Model(dataset.clasess).to(device)
 

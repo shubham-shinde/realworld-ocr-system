@@ -17,7 +17,7 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
     letters = ' ' + STR.ascii_letters + STR.digits
     clasess = len(letters) + 1
 
-    def __init__(self, image_files, only_synt=False, gray=True, out_size=(32, 128)):
+    def __init__(self, image_files, only_synt=False, gray=True, out_size=(32, 128), temp_size=100_000):
         super(ImageTextDatasetMNT, self).__init__()
         self.web2lowerset = json.load(open(absolute_path / 'words.json'))
         self.image_files = image_files
@@ -48,6 +48,13 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
                 f.close()
 
         self.raw_data = h5py.File(path, 'r')
+        self.temp_size = temp_size
+        self.temp_start = 0
+        self.temp_end = temp_size
+        self.img = list(self.raw_data['img'][self.temp_start: self.temp_end])
+        self.target = list(
+            self.raw_data['target'][self.temp_start: self.temp_end])
+        self.ln = list(self.raw_data['len'][self.temp_start: self.temp_end])
         # self.img = list(self.raw_data['img'])
         # self.target = list(self.raw_data['target'])
         # self.ln = list(self.raw_data['len'])
@@ -144,10 +151,25 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
         return img.to(torch.float32), label, max_length
 
     def __getitem__(self, index):
+        if index < self.temp_start or index > self.temp_end:
+            self.temp_start = index
+            self.temp_end = index+self.temp_size
+            self.img = list(self.raw_data['img']
+                            [self.temp_start: self.temp_end])
+            self.target = list(
+                self.raw_data['target'][self.temp_start: self.temp_end])
+            self.ln = list(self.raw_data['len']
+                           [self.temp_start: self.temp_end])
+
+        # return (
+        #     torch.tensor(self.raw_data['img'][index]),
+        #     torch.tensor(self.raw_data['target'][index]),
+        #     torch.tensor(self.raw_data['len'][index])
+        # )
         return (
-            torch.tensor(self.raw_data['img'][index]),
-            torch.tensor(self.raw_data['target'][index]),
-            torch.tensor(self.raw_data['len'][index])
+            torch.tensor(self.img[index - self.temp_start]),
+            torch.tensor(self.target[index - self.temp_start]),
+            torch.tensor(self.ln[index - self.temp_start]),
         )
         # return (
         #     torch.tensor(self.img[index]),
@@ -163,6 +185,9 @@ if __name__ == '__main__':
     dataset = ImageTextDatasetMNT(files)
     img, label, ln = dataset[0]
     print('original images:', img.shape, label, ln)
-    dataset = ImageTextDatasetMNT(files, only_synt=True)
-    img, label, ln = dataset[0]
-    print('synthetic images:', img.shape, label, ln)
+    img, label, ln = dataset[20]
+    print('original images:', img.shape, label, ln)
+    img, label, ln = dataset[500]
+    print('second images:', img.shape, label, ln)
+    img, label, ln = dataset[520]
+    print('second images:', img.shape, label, ln)
