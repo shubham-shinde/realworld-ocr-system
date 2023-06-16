@@ -151,7 +151,7 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
         return img.to(torch.float32), label, max_length
 
     def __getitem__(self, index):
-        if index < self.temp_start or index > self.temp_end:
+        if index < self.temp_start or index >= self.temp_end:
             self.temp_start = index
             self.temp_end = index+self.temp_size
             self.img = list(self.raw_data['img']
