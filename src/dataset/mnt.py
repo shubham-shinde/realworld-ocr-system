@@ -17,7 +17,7 @@ class ImageTextDatasetMNT(torch.utils.data.Dataset):
     letters = ' ' + STR.ascii_letters + STR.digits
     clasess = len(letters) + 1
 
-    def __init__(self, image_files, only_synt=False, gray=True, out_size=(32, 128), temp_size=100_000):
+    def __init__(self, image_files, only_synt=False, gray=True, out_size=(32, 128), temp_size=10_000):
         super(ImageTextDatasetMNT, self).__init__()
         self.web2lowerset = json.load(open(absolute_path / 'words.json'))
         self.image_files = image_files
